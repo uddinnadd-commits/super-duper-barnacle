@@ -1,0 +1,44 @@
+
+name: Build UltraParry
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Verify Java version
+        run: java -version
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build without migrations or updates
+        run: ./gradlew build --no-daemon --offline
+        continue-on-error: false
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: UltraParry-Forge-1.20.1
+          path: build/libs/*.jar
+          if-no-files-found: error
